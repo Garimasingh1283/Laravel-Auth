@@ -18,24 +18,24 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        // Validate incoming request data
+        // Validattion
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Create new user with hashed password
+        // new user with hashed password
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
 
-        // Generate authentication token
+        // authentication token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Return success response with token
+        // success response with token
         return response()->json([
             'success' => true,
             'message' => 'User registered successfully',
@@ -48,7 +48,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Login existing user
+     * Login
      * 
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -61,7 +61,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // Find user by email
+        //  user by email
         $user = User::where('email', $request->email)->first();
 
         // Check if user exists and password matches
@@ -74,7 +74,7 @@ class AuthController extends Controller
         // Generate new authentication token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Return success response with token
+        // success response with token
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
@@ -87,7 +87,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user (invalidate token)
+     * Logout user
      * 
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -104,7 +104,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Get authenticated user details
+     * fetch user
      * 
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
