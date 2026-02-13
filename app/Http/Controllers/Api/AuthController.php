@@ -118,4 +118,79 @@ class AuthController extends Controller
             ]
         ], 200);
     }
+
+/**
+ * Update user profile (PUT)
+ */
+public function updateProfile(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email,' . $request->user()->id,
+    ]);
+
+    $user = $request->user();
+    $user->update($validated);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Profile updated successfully',
+        'data' => ['user' => $user]
+    ], 200);
+}
+
+/**
+ * Change password (PATCH)
+ */
+public function changePassword(Request $request)
+{
+    $validated = $request->validate([
+        'current_password' => 'required',
+        'new_password' => 'required|string|min:8',
+    ]);
+
+    $user = $request->user();
+
+    if (!Hash::check($validated['current_password'], $user->password)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Current password is incorrect',
+        ], 400);
+    }
+
+    $user->password = Hash::make($validated['new_password']);
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Password changed successfully',
+    ], 200);
+}
+
+/**
+ * Delete account (DELETE)
+ */
+public function deleteAccount(Request $request)
+{
+    $validated = $request->validate([
+        'password' => 'required',
+    ]);
+
+    $user = $request->user();
+
+    if (!Hash::check($validated['password'], $user->password)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Password is incorrect',
+        ], 400);
+    }
+
+    $user->tokens()->delete();
+    $user->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Account deleted successfully',
+    ], 200);
+}
 }
